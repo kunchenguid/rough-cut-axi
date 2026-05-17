@@ -1,0 +1,7 @@
+node_modules/
+test-results/
+coverage/
+.lavish/
+.gnhf/
+.agents/
+pnpm-lock.yaml

@@ -1,0 +1,26 @@
+{
+  "provider": "elevenlabs",
+  "sourceFilename": "one_sentence.mp4",
+  "languageCode": "en",
+  "duration": 3.2,
+  "text": "Hello world, this is Rough Cut AXI.",
+  "segments": [
+    {
+      "id": "seg_1",
+      "speaker": "speaker_1",
+      "start": 0.28,
+      "end": 2.64,
+      "text": "Hello world, this is Rough Cut AXI.",
+      "confidence": 0.96
+    }
+  ],
+  "words": [
+    { "text": "Hello", "start": 0.28, "end": 0.72, "speaker": "speaker_1", "confidence": 0.98, "type": "word" },
+    { "text": "world,", "start": 0.73, "end": 1.08, "speaker": "speaker_1", "confidence": 0.97, "type": "word" },
+    { "text": "this", "start": 1.18, "end": 1.42, "speaker": "speaker_1", "confidence": 0.95, "type": "word" },
+    { "text": "is", "start": 1.43, "end": 1.57, "speaker": "speaker_1", "confidence": 0.95, "type": "word" },
+    { "text": "Video", "start": 1.66, "end": 2.02, "speaker": "speaker_1", "confidence": 0.96, "type": "word" },
+    { "text": "AXI.", "start": 2.04, "end": 2.64, "speaker": "speaker_1", "confidence": 0.93, "type": "word" }
+  ],
+  "audioEvents": []
+}

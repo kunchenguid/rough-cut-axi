@@ -1,0 +1,34 @@
+{
+  "provider": "elevenlabs",
+  "sourceFilename": "silence_gap.mp4",
+  "languageCode": "en",
+  "duration": 6.0,
+  "text": "Before the pause. After the pause.",
+  "segments": [
+    {
+      "id": "seg_1",
+      "speaker": "speaker_1",
+      "start": 0.4,
+      "end": 1.74,
+      "text": "Before the pause.",
+      "confidence": 0.95
+    },
+    {
+      "id": "seg_2",
+      "speaker": "speaker_1",
+      "start": 4.1,
+      "end": 5.28,
+      "text": "After the pause.",
+      "confidence": 0.94
+    }
+  ],
+  "words": [
+    { "text": "Before", "start": 0.4, "end": 0.86, "speaker": "speaker_1", "confidence": 0.96, "type": "word" },
+    { "text": "the", "start": 0.88, "end": 1.04, "speaker": "speaker_1", "confidence": 0.95, "type": "word" },
+    { "text": "pause.", "start": 1.08, "end": 1.74, "speaker": "speaker_1", "confidence": 0.94, "type": "word" },
+    { "text": "After", "start": 4.1, "end": 4.48, "speaker": "speaker_1", "confidence": 0.95, "type": "word" },
+    { "text": "the", "start": 4.5, "end": 4.66, "speaker": "speaker_1", "confidence": 0.94, "type": "word" },
+    { "text": "pause.", "start": 4.7, "end": 5.28, "speaker": "speaker_1", "confidence": 0.93, "type": "word" }
+  ],
+  "audioEvents": [{ "type": "silence", "start": 1.74, "end": 4.1, "confidence": 0.99 }]
+}

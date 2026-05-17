@@ -1,0 +1,11 @@
+packages:
+  - "."
+
+minimumReleaseAge: 10080
+minimumReleaseAgeStrict: true
+minimumReleaseAgeExclude:
+  - "@playwright/test"
+  - axi-sdk-js
+  - playwright
+  - playwright-core
+  - rough-cut-axi
