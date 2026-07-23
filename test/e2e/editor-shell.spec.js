@@ -657,6 +657,7 @@ test("browser passage play stops at the selected passage end", async ({ page }) 
     });
     expect(atStoredEnd).toEqual({ currentTime: 3, paused: true });
   } finally {
+    await page.close();
     await server.close();
     await rm(homeDir, { recursive: true, force: true });
   }
