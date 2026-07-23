@@ -35,8 +35,10 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
   );
   assert.match(workflow, /^    branches:\n      - main$/m);
   assert.doesNotMatch(workflow, /pull_request_target/);
-  assert.match(workflow, /^permissions:\n  contents: read$/m);
-  assert.doesNotMatch(workflow, /^\s+\w+: write$/m);
+  const permissionDeclarations = [...workflow.matchAll(/^permissions:\n((?:  [^\n]+\n)+)/gm)];
+  assert.equal(permissionDeclarations.length, 1);
+  assert.equal(permissionDeclarations[0][1], "  contents: read\n");
+  assert.equal([...workflow.matchAll(/^[ \t]+permissions:/gm)].length, 0);
   assert.doesNotMatch(workflow, /secrets\./);
   assert.doesNotMatch(workflow, /actions\/checkout/);
   assert.match(workflow, /^    name: PR must be raised via no-mistakes$/m);
