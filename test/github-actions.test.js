@@ -42,14 +42,10 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
   assert.doesNotMatch(workflow, /secrets\./);
   assert.doesNotMatch(workflow, /actions\/checkout/);
   assert.match(workflow, /^    name: PR must be raised via no-mistakes$/m);
-  const exemptAuthors = [
-    ...workflow.matchAll(/github\.event\.pull_request\.user\.login != '([^']+)'/g),
-  ].map((match) => match[1]);
-  assert.deepEqual(exemptAuthors, [
-    "github-actions[bot]",
-    "dependabot[bot]",
-    "release-please[bot]",
-  ]);
+  const exemptAuthors = [...workflow.matchAll(/github\.event\.pull_request\.user\.login != '([^']+)'/g)].map(
+    (match) => match[1],
+  );
+  assert.deepEqual(exemptAuthors, ["github-actions[bot]", "dependabot[bot]", "release-please[bot]"]);
   assert.ok(workflow.includes(marker));
   assert.match(workflow, /^  cancel-in-progress: true$/m);
 

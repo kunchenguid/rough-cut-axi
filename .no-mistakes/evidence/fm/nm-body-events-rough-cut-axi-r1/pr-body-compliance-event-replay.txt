@@ -1,0 +1,25 @@
+End-user workflow event replay for PR #42
+Baseline at a756d4067881304e98f1fbf393fcb68daa510814:
+  all events group=no-mistakes-required-42 (body events can coalesce)
+
+Target at 79e51c1d9de627d800dcd13661e51ff4c70174de:
+opened      run=1001 group=no-mistakes-required-42-1001 conclusion=success
+  Found no-mistakes signature in PR #42 body.
+edited      run=1002 group=no-mistakes-required-42-1002 conclusion=failure
+  ::error::This PR was not raised through no-mistakes.
+edited      run=1003 group=no-mistakes-required-42-1003 conclusion=success
+  Found no-mistakes signature in PR #42 body.
+synchronize run=1004 group=no-mistakes-required-42-head-change conclusion=success
+  Found no-mistakes signature in PR #42 body.
+reopened    run=1005 group=no-mistakes-required-42-head-change conclusion=success
+  Found no-mistakes signature in PR #42 body.
+
+Preserved workflow contract
+trigger=pull_request only: YES
+permissions=contents: read only: YES
+checkout absent: YES
+secrets absent: YES
+cancel-in-progress=true: YES
+stable check name present: YES
+marker present: YES
+three bot exemptions present: YES
