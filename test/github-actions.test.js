@@ -119,14 +119,7 @@ test("GitHub Actions guard release-please generated files", async () => {
   assert.match(workflow, /\.release-please-manifest\.json/);
 });
 
-test("GitHub Actions include release-please automation", async () => {
-  const workflow = await readFile(".github/workflows/release-please.yml", "utf8");
-  const config = JSON.parse(await readFile("release-please-config.json", "utf8"));
-
-  assert.match(workflow, /name: release-please/);
-  assert.match(workflow, /googleapis\/release-please-action@v4/);
-  assert.match(workflow, /pnpm install --frozen-lockfile/);
-  assert.match(workflow, /pnpm run check/);
-  assert.match(workflow, /pnpm test/);
-  assert.equal(config.packages["."]["package-name"], "rough-cut-axi");
+test("repository has no release-please automation", async () => {
+  await assert.rejects(() => readFile(".github/workflows/release-please.yml", "utf8"), /ENOENT/);
+  await assert.rejects(() => readFile("release-please-config.json", "utf8"), /ENOENT/);
 });

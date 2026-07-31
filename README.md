@@ -5,11 +5,6 @@
       alt="CI"
       src="https://img.shields.io/github/actions/workflow/status/kunchenguid/rough-cut-axi/ci.yml?style=flat-square&label=ci"
   /></a>
-  <a href="https://github.com/kunchenguid/rough-cut-axi/actions/workflows/release-please.yml"
-    ><img
-      alt="Release"
-      src="https://img.shields.io/github/actions/workflow/status/kunchenguid/rough-cut-axi/release-please.yml?style=flat-square&label=release"
-  /></a>
   <a
     href="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue?style=flat-square"
     ><img
