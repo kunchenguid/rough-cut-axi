@@ -45,7 +45,8 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
   const exemptAuthors = [...workflow.matchAll(/github\.event\.pull_request\.user\.login != '([^']+)'/g)].map(
     (match) => match[1],
   );
-  assert.deepEqual(exemptAuthors, ["github-actions[bot]", "dependabot[bot]", "release-please[bot]"]);
+  assert.deepEqual(exemptAuthors, ["github-actions[bot]", "dependabot[bot]"]);
+  assert.doesNotMatch(workflow, /release-please/);
   assert.ok(workflow.includes(marker));
   assert.match(workflow, /^  cancel-in-progress: true$/m);
 
@@ -111,15 +112,8 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
   assert.ok(bodyGroups.every((value) => value !== group("synchronize", 1004)));
 });
 
-test("GitHub Actions guard release-please generated files", async () => {
-  const workflow = await readFile(".github/workflows/guard-generated-files.yml", "utf8");
-
-  assert.match(workflow, /name: Guard generated files/);
-  assert.match(workflow, /CHANGELOG\.md/);
-  assert.match(workflow, /\.release-please-manifest\.json/);
-});
-
 test("repository has no release-please automation", async () => {
   await assert.rejects(() => readFile(".github/workflows/release-please.yml", "utf8"), /ENOENT/);
+  await assert.rejects(() => readFile(".github/workflows/guard-generated-files.yml", "utf8"), /ENOENT/);
   await assert.rejects(() => readFile("release-please-config.json", "utf8"), /ENOENT/);
 });
