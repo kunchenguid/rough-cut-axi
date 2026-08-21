@@ -3,6 +3,8 @@ import { spawnSync } from "node:child_process";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
+import { extractGateScript } from "./helpers/no-mistakes-gate.js";
+
 test("GitHub Actions CI uses pnpm on Node 24", async () => {
   const workflow = await readFile(".github/workflows/ci.yml", "utf8");
 
@@ -20,6 +22,14 @@ test("GitHub Actions CI uses pnpm on Node 24", async () => {
 test("GitHub Actions execute every no-mistakes PR body event", async () => {
   const workflow = await readFile(".github/workflows/no-mistakes-required.yml", "utf8");
   const marker = "Updates from [git push no-mistakes](https://github.com/kunchenguid/no-mistakes)";
+  // A signature alone no longer passes the gate: since no-mistakes 1.46.0 the
+  // body also carries a machine-readable step attestation, so a signed body
+  // fixture must include one to reach the same verdict CI reaches.
+  const attestation = `<!-- no-mistakes-pipeline-attestation:v1 ${JSON.stringify({
+    head_sha: "12df13109c6ad8d64646b85ac7170b23afe6e9bf",
+    steps: ["review", "test", "document"].map((step) => ({ step, status: "completed" })),
+  })} -->`;
+  const signedBody = (text) => `${text}\n${marker}\n\n${attestation}\n`;
 
   assert.match(workflow, /^name: Require no-mistakes$/m);
   assert.match(
@@ -57,11 +67,9 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
     /^  group: no-mistakes-required-\$\{\{ github\.event\.pull_request\.number \}\}-\$\{\{ \(github\.event\.action == 'opened' \|\| github\.event\.action == 'edited'\) && github\.run_id \|\| 'head-change' \}\}$/m,
   );
 
-  const runBlock = workflow.match(/        run: \|\n((?:          .*\n?)*)/);
-  assert.ok(runBlock, "signature run block must exist");
-  const script = runBlock[1].replace(/^ {10}/gm, "");
+  const script = extractGateScript(workflow);
   const execute = (event) =>
-    spawnSync("sh", ["-c", script], {
+    spawnSync("bash", ["-c", script], {
       env: {
         ...process.env,
         PR_NUMBER: "42",
@@ -77,7 +85,7 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
       action: "opened",
       runId: 1001,
       runNumber: 80,
-      body: `Synthetic body\n${marker}`,
+      body: signedBody("Synthetic body"),
       expectedStatus: 0,
       expectedGroup: "no-mistakes-required-42-1001",
     },
@@ -95,7 +103,7 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
       action: "edited",
       runId: 1003,
       runNumber: 82,
-      body: `Synthetic edited body\n${marker}`,
+      body: signedBody("Synthetic edited body"),
       expectedStatus: 0,
       expectedGroup: "no-mistakes-required-42-1003",
     },
