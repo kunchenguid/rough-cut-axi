@@ -663,7 +663,10 @@ async function readResponseStreamUntil(response, marker) {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let text = "";
-  const deadline = Date.now() + 1000;
+  // Generous bound: it only caps how long a *failing* stream is waited on. The
+  // former 1s budget flaked when the whole suite ran in one process and the
+  // mock ffmpeg's progress events landed late.
+  const deadline = Date.now() + 10000;
   try {
     while (Date.now() < deadline) {
       const readResult = await Promise.race([
