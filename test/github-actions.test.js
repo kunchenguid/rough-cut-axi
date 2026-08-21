@@ -25,8 +25,9 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
   // A signature alone no longer passes the gate: since no-mistakes 1.46.0 the
   // body also carries a machine-readable step attestation, so a signed body
   // fixture must include one to reach the same verdict CI reaches.
+  const headSha = "12df13109c6ad8d64646b85ac7170b23afe6e9bf";
   const attestation = `<!-- no-mistakes-pipeline-attestation:v1 ${JSON.stringify({
-    head_sha: "12df13109c6ad8d64646b85ac7170b23afe6e9bf",
+    head_sha: headSha,
     steps: ["review", "test", "document"].map((step) => ({ step, status: "completed" })),
   })} -->`;
   const signedBody = (text) => `${text}\n${marker}\n\n${attestation}\n`;
@@ -67,6 +68,8 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
     /^  group: no-mistakes-required-\$\{\{ github\.event\.pull_request\.number \}\}-\$\{\{ \(github\.event\.action == 'opened' \|\| github\.event\.action == 'edited'\) && github\.run_id \|\| 'head-change' \}\}$/m,
   );
 
+  assert.match(workflow, /^          PR_HEAD_SHA: \$\{\{ github\.event\.pull_request\.head\.sha \}\}$/m);
+
   const script = extractGateScript(workflow);
   const execute = (event) =>
     spawnSync("bash", ["-c", script], {
@@ -74,6 +77,7 @@ test("GitHub Actions execute every no-mistakes PR body event", async () => {
         ...process.env,
         PR_NUMBER: "42",
         PR_AUTHOR: "first-time-fork-contributor",
+        PR_HEAD_SHA: headSha,
         PR_BODY: event.body,
       },
       encoding: "utf8",

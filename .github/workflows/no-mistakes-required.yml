@@ -31,6 +31,7 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -eu
           marker='Updates from [git push no-mistakes](https://github.com/kunchenguid/no-mistakes)'
@@ -157,7 +158,31 @@ jobs:
             exit 1
           fi
 
-          echo "Attestation head_sha: $(printf '%s' "$payload" | jq -r '.head_sha // "(absent)"')"
+          # Bind the attestation to the commit under review. Without this a run
+          # could pass review/test/document on one commit and the PR could then
+          # carry additional commits the pipeline never saw: the attestation is a
+          # claim about a specific head_sha, so a mismatch means it is stale.
+          # A synchronize whose body no-mistakes did not rewrite going red is the
+          # intended outcome, not a false positive.
+          attested_head_sha="$(printf '%s' "$payload" | jq -r '.head_sha // ""')"
+          echo "Attestation head_sha: ${attested_head_sha:-(absent)}"
+          echo "Pull request head sha: ${PR_HEAD_SHA:-(absent)}"
+
+          # An empty PR_HEAD_SHA would make an absent attestation head_sha compare
+          # equal, so treat a missing head on either side as a mismatch.
+          if [ -z "${PR_HEAD_SHA:-}" ] || [ "$attested_head_sha" != "$PR_HEAD_SHA" ]; then
+            echo "::error::The no-mistakes pipeline attestation is stale for the current head: it attests ${attested_head_sha:-(absent)}, but this PR's head is ${PR_HEAD_SHA:-(absent)}."
+            {
+              echo
+              echo "A commit was pushed after the no-mistakes run that wrote this body, so the"
+              echo "recorded review, test, and document results do not cover the current head."
+              echo
+              echo "Re-run 'git push no-mistakes' to refresh the attestation for this head."
+              echo
+              echo "PR author: ${PR_AUTHOR}"
+            } >&2
+            exit 1
+          fi
 
           tab="$(printf '\t')"
           gate_status=0

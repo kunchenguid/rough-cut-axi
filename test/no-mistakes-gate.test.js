@@ -28,18 +28,18 @@ if (process.env.CI && !runnable) {
   throw new Error("CI must provide bash and jq to exercise the no-mistakes gate");
 }
 
-function runGate(body) {
-  const result = spawnSync("bash", [scriptPath], {
-    env: { ...process.env, PR_BODY: body, PR_AUTHOR: "somedev", PR_NUMBER: "42" },
-    encoding: "utf8",
-  });
-  return { code: result.status ?? -1, output: `${result.stdout}${result.stderr}` };
-}
-
 const SIGNATURE = "Updates from [git push no-mistakes](https://github.com/kunchenguid/no-mistakes)";
 const ATTESTATION_PREFIX = "<!-- no-mistakes-pipeline-attestation:v1 ";
 const ATTESTATION_SUFFIX = " -->";
 const HEAD_SHA = "12df13109c6ad8d64646b85ac7170b23afe6e9bf";
+
+function runGate(body, headSha = HEAD_SHA) {
+  const result = spawnSync("bash", [scriptPath], {
+    env: { ...process.env, PR_BODY: body, PR_AUTHOR: "somedev", PR_NUMBER: "42", PR_HEAD_SHA: headSha },
+    encoding: "utf8",
+  });
+  return { code: result.status ?? -1, output: `${result.stdout}${result.stderr}` };
+}
 
 /** A PR body shaped like the one no-mistakes writes. */
 function prBody(attestationPayload) {
@@ -162,6 +162,38 @@ gateTest("fails closed when the attestation comment is never closed", () => {
   const { code, output } = runGate(body);
   assert.equal(code, 1, output);
   assert.match(output, /no JSON payload could be extracted/);
+});
+
+// The attestation is a claim about one commit. A body that was not rewritten by
+// a fresh no-mistakes run - a synchronize that pushed a commit the pipeline never
+// saw - must go red: that is the contract, not a false positive.
+gateTest("rejects an attestation whose head_sha is not the PR's current head", () => {
+  const { code, output } = runGate(prBody(attestation(HEALTHY_STEPS)), "0000000000000000000000000000000000000000");
+  assert.equal(code, 1, output);
+  assert.match(output, /attestation is stale for the current head/);
+  assert.ok(output.includes(HEAD_SHA), output);
+  assert.ok(output.includes("0000000000000000000000000000000000000000"), output);
+  assert.match(output, /Re-run 'git push no-mistakes' to refresh the attestation/);
+});
+
+gateTest("accepts an attestation whose head_sha matches the PR's current head", () => {
+  const { code, output } = runGate(prBody(attestation(HEALTHY_STEPS)), HEAD_SHA);
+  assert.equal(code, 0, output);
+  assert.match(output, /review, test, and document all completed/);
+});
+
+gateTest("rejects an attestation that records no head_sha at all", () => {
+  const payload = JSON.stringify({ steps: HEALTHY_STEPS.map(([step, status]) => ({ step, status })) });
+  const { code, output } = runGate(prBody(payload));
+  assert.equal(code, 1, output);
+  assert.match(output, /attestation is stale for the current head/);
+  assert.match(output, /it attests \(absent\)/);
+});
+
+gateTest("fails closed when the runner supplies no head sha", () => {
+  const { code, output } = runGate(prBody(attestation(HEALTHY_STEPS)), "");
+  assert.equal(code, 1, output);
+  assert.match(output, /attestation is stale for the current head/);
 });
 
 gateTest("accepts a CRLF body", () => {
