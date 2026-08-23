@@ -1,0 +1,13 @@
+{
+  "pull_request": {
+    "number": 42,
+    "body": "## Pipeline\n\nNo attestation was produced.\n",
+    "head": {
+      "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "ref": "feature/shared-gate"
+    },
+    "user": {
+      "login": "contributor"
+    }
+  }
+}
